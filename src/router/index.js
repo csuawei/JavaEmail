@@ -7,6 +7,7 @@ import Inbox from "@/components/Inbox.vue";
 import Outbox from "@/components/Outbox.vue";
 import Draft from "@/components/Draft.vue";
 import Contact from "@/components/Contact.vue";
+import DraftWrite from "@/components/DraftWrite.vue";
 const routes = [
     {
         path:'/',
@@ -25,7 +26,7 @@ const routes = [
         component: Index,
 
         children:[
- // 写信路由
+        // 写信路由
         {
           path: '/letter/write',
           name: 'WriteLetter',
@@ -48,6 +49,11 @@ const routes = [
           path: '/letter/draft',
           name: 'Draft',
           component: Draft
+        },
+         {
+          path: '/letter/draft-write',
+          name: 'DraftWrite',
+          component: DraftWrite,
         },
         // 联系人路由
         {

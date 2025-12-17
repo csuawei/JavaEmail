@@ -216,6 +216,7 @@ public class MailMessageController {
 
     @PostMapping("/saveDraft")
     public Object saveDraft(DraftDTO draftDTO) {
+        System.out.println(draftDTO);
         MailMessage mailMessage = new MailMessage();
         mailMessage.setSenderEmail(draftDTO.getReceiverEmail());
         mailMessage.setSenderAccountEmail(draftDTO.getSenderEmail());
@@ -237,6 +238,37 @@ public class MailMessageController {
 
     }
 
+    @GetMapping("/getDraftsByEmail")
+    public Object getDraftsByEmail(String email) {
+        QueryWrapper<MailMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("sender_account_email",email);
+        queryWrapper.eq("status",0);
+        List<MailMessage> mailMessages = mailMessageService.getBaseMapper().selectList(queryWrapper);
+        if(mailMessages!=null && mailMessages.size()>0){
+            return ResultUtil.success(mailMessages);
+        }
+        return ResultUtil.fail("908","暂无草稿");
+    }
+
+    @GetMapping("/getDraftById")
+    public Object getDraftById(Long id) {
+        MailMessage mailMessage = mailMessageService.getBaseMapper().selectById(id);
+        if(mailMessage!=null){
+            return ResultUtil.success(mailMessage);
+        }
+        return ResultUtil.fail("908","暂无草稿");
+
+    }
+
+    @GetMapping("/deleteById")
+    public Object deleteById(Long id) {
+        System.out.println(id);
+        int i = mailMessageService.getBaseMapper().deleteById(id);
+        if(i>0){
+            return ResultUtil.success(null);
+        }
+        else return ResultUtil.fail("909","删除失败");
+    }
 
 
 }

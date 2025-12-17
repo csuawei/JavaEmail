@@ -129,7 +129,7 @@ export default {
     async getMailAccountList() {
       try {
         const res = await this.$axios({
-          url: 'http://localhost:8081/mail-account/getAcById', // 完整路径（与后端一致）
+          url: 'http://localhost:8081/mail-account/getAcById', 
           method: 'post',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           data: { id: this.currentUserId } // 传递用户ID
