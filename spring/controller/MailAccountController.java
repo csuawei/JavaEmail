@@ -2,6 +2,8 @@ package com.db.spring.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.db.spring.common.EmailServerConfigParser;
+import com.db.spring.dto.MailAccountDTO;
+import com.db.spring.dto.MailDTO;
 import com.db.spring.entity.MailAccount;
 import com.db.spring.entity.MailMessageFolder;
 import com.db.spring.entity.SysUser;
@@ -51,9 +53,9 @@ public class MailAccountController {
     }
 
     @PostMapping("/changeEmail")
-    public Object changeEmail(@RequestParam Long id,@RequestParam String email){
-        SysUser sysUser = sysUserService.getBaseMapper().selectById(id);
-        sysUser.setEmail(email);
+    public Object changeEmail(@RequestBody MailDTO mailDTO){
+        SysUser sysUser = sysUserService.getBaseMapper().selectById(mailDTO.getId());
+        sysUser.setEmail(mailDTO.getEmail());
         int i = sysUserService.getBaseMapper().updateById(sysUser);
         if (i>0){
             return ResultUtil.success(sysUser,"切换成功");
@@ -62,12 +64,12 @@ public class MailAccountController {
     }
 
     @PostMapping("/addMailAccount")
-    public Object addMailAccount(@RequestParam Long id,@RequestParam String email,@RequestParam String authCode){
-        EmailServerConfigParser.EmailServerConfig config = EmailServerConfigParser.parse(email);
+    public Object addMailAccount(@RequestBody MailAccountDTO mailAccountDTO){
+        EmailServerConfigParser.EmailServerConfig config = EmailServerConfigParser.parse(mailAccountDTO.getEmail());
         MailAccount mailAccount = new MailAccount();
-        mailAccount.setEmail(email);
-        mailAccount.setUserId(id);
-        mailAccount.setAuthCode(authCode);
+        mailAccount.setEmail(mailAccountDTO.getEmail());
+        mailAccount.setUserId(mailAccountDTO.getId());
+        mailAccount.setAuthCode(mailAccountDTO.getAuthCode());
         mailAccount.setProtocolSmtp(config.getSmtpHost());
         mailAccount.setProtocolSmtpPort(config.getSmtpPort());
         mailAccount.setProtocolPop3(config.getPop3Host());

@@ -8,6 +8,7 @@ import Outbox from "@/components/Outbox.vue";
 import Draft from "@/components/Draft.vue";
 import Contact from "@/components/Contact.vue";
 import DraftWrite from "@/components/DraftWrite.vue";
+import MailAccount from "@/components/MailAccount.vue";
 const routes = [
     {
         path:'/',
@@ -62,9 +63,14 @@ const routes = [
           component: Contact
         },
         {
-        path: '/letter/detail', // 详情页子路由，与收件箱路由同级
+        path: '/letter/detail', // 详情页子路由
         name: 'MailDetail',
         component: () => import('@/components/MailDetail.vue')
+        },
+        {
+        path: '/mail/account',
+        name: 'MailAccount',
+        component: MailAccount
         }
         ]
     }

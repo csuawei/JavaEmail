@@ -108,16 +108,14 @@ export default {
   },
   methods: {
     /**
-     * 初始化用户信息（从 sessionStorage 读取，适配现有权限逻辑）
+     * 初始化用户信息
      */
     initUserInfo() {
       const userInfoStr = sessionStorage.getItem('userInfo')
       if (!userInfoStr) {
-        // 导航守卫已处理未登录跳转，此处仅做兜底
         this.$router.push('/login')
         return
       }
-
       const userInfo = JSON.parse(userInfoStr)
       this.userEmail = userInfo.email
       this.userId = userInfo.userId
@@ -136,6 +134,9 @@ export default {
      * 调用后端接口获取邮件列表（适配现有接口路径）
      */
     async fetchMailList() {
+      const userInfoStr = sessionStorage.getItem('userInfo')
+      const userInfo = JSON.parse(userInfoStr)
+      console.log(userInfo)
       this.loading = true
       try {
         const res = await this.$axios({
