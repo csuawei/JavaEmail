@@ -1,9 +1,12 @@
 package com.db.spring.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.db.spring.common.EmailServerConfigParser;
 import com.db.spring.entity.MailAccount;
 import com.db.spring.entity.MailMessageFolder;
+import com.db.spring.entity.SysUser;
 import com.db.spring.service.MailAccountService;
+import com.db.spring.service.SysUserService;
 import com.db.spring.util.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +27,9 @@ public class MailAccountController {
     @Autowired
     private MailAccountService mailAccountService;
 
+    @Autowired
+    private SysUserService sysUserService;
+
 
     @PostMapping("/getAcByidemail")
     public MailAccount getAcByidemail(@RequestParam String email, @RequestParam Long id){
@@ -42,5 +48,33 @@ public class MailAccountController {
         queryWrapper.eq("user_id",id);
         List<MailAccount> list = mailAccountService.getBaseMapper().selectList(queryWrapper);
         return ResultUtil.success(list);
+    }
+
+    @PostMapping("/changeEmail")
+    public Object changeEmail(@RequestParam Long id,@RequestParam String email){
+        SysUser sysUser = sysUserService.getBaseMapper().selectById(id);
+        sysUser.setEmail(email);
+        int i = sysUserService.getBaseMapper().updateById(sysUser);
+        if (i>0){
+            return ResultUtil.success(sysUser,"切换成功");
+        }
+        return ResultUtil.fail("101","切换失败");
+    }
+
+    @PostMapping("/addMailAccount")
+    public Object addMailAccount(@RequestParam Long id,@RequestParam String email,@RequestParam String authCode){
+        EmailServerConfigParser.EmailServerConfig config = EmailServerConfigParser.parse(email);
+        MailAccount mailAccount = new MailAccount();
+        mailAccount.setEmail(email);
+        mailAccount.setUserId(id);
+        mailAccount.setAuthCode(authCode);
+        mailAccount.setProtocolSmtp(config.getSmtpHost());
+        mailAccount.setProtocolSmtpPort(config.getSmtpPort());
+        mailAccount.setProtocolPop3(config.getPop3Host());
+        mailAccount.setProtocolPop3Port(config.getPop3Port());
+        mailAccount.setProtocolImap(config.getImapHost());
+        mailAccount.setProtocolImapPort(config.getImapPort());
+        mailAccountService.getBaseMapper().insert(mailAccount);
+        return ResultUtil.success(mailAccount);
     }
 }
