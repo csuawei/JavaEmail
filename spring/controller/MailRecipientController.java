@@ -77,7 +77,7 @@ public class MailRecipientController {
             // 关键修改：查询 MailMessage 时按 sendTime 降序排列（MyBatis-Plus 语法）
             QueryWrapper<MailMessage> mailQuery = new QueryWrapper<>();
             mailQuery.in("message_id", ids)
-                    .orderByDesc("send_time"); // 按发送时间降序（新邮件在前）
+                    .orderByDesc("send_time").eq("is_deleted",0).orderByAsc("status");
             res = mailMessageService.getBaseMapper().selectList(mailQuery);
         }
         if(res.isEmpty()){

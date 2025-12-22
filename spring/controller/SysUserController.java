@@ -10,6 +10,7 @@ import com.db.spring.mapper.MailMessageFolderMapper;
 import com.db.spring.service.MailAttachmentService;
 import com.db.spring.service.MailMessageFolderService;
 import com.db.spring.service.SysUserService;
+import com.db.spring.util.PasswordEncoderUtil;
 import com.db.spring.util.ResultUtil;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.pop3.POP3Folder;
@@ -70,7 +71,8 @@ public class SysUserController {
 
         SysUser sysUser = new SysUser();
         sysUser.setUsername(registerDTO.getUsername());
-        sysUser.setPassword(registerDTO.getPassword());
+        String encryptedPassword = PasswordEncoderUtil.encrypt(registerDTO.getPassword());
+        sysUser.setPassword(encryptedPassword); // 存储密文
         sysUser.setNickname(registerDTO.getNickname());
 
         int i = sysUserService.getBaseMapper().insert(sysUser);
@@ -85,16 +87,23 @@ public class SysUserController {
     public Object login(@RequestBody LoginDTO loginDTO){
 
         String username = loginDTO.getUsername();
-        String password = loginDTO.getPassword();
-        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<SysUser>();
-        queryWrapper.eq("username",username).eq("password",password);
+        String rawPassword = loginDTO.getPassword(); // 前端传入的明文密码
+
+        // 1. 根据用户名查询用户（仅查一条）
+        QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username);
         List<SysUser> list = sysUserService.getBaseMapper().selectList(queryWrapper);
 
-        if(list.size()>0){
-            return ResultUtil.success(list.get(0),"登录成功");
+        if (list.isEmpty()) {
+            return ResultUtil.fail("502", "用户不存在");
         }
-        else {
-            return ResultUtil.fail("502","用户不存在或者密码错误");
+        SysUser user = list.get(0);
+
+        // 2. 验证密码（明文与密文匹配）
+        if (PasswordEncoderUtil.matches(rawPassword, user.getPassword())) {
+            return ResultUtil.success(user, "登录成功");
+        } else {
+            return ResultUtil.fail("502", "密码错误");
         }
     }
 

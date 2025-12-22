@@ -141,10 +141,11 @@ export default {
         type: 'warning'
       }).then(async () => {
         try {
-            
-          const res = await this.$axios.post('/mail-account/delete', {
-            accountId: accountId
-          })
+          const res = await this.$axios({
+          url: 'http://localhost:8081/mail-account/deleteAccount', 
+          method: 'post',
+          data: { id: accountId }
+        });
           if (res.data.code === '0') {
             this.$message.success('删除成功')
             this.loadAccountList()

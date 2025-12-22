@@ -101,7 +101,7 @@ export default {
             headers: {                  // 请求头
               "Content-Type": "application/json",
             },
-            data: { // 请求参数，为 data，与登录的 params 不太一样
+            data: { // 请求参数
               username: _this.ruleForm.username,
               password: _this.ruleForm.password,
               nickname: _this.ruleForm.nickname,

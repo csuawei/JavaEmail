@@ -263,11 +263,10 @@ export default {
         type: 'warning'
       }).then(async () => {
         try {
-          // 调用后端批量删除接口（需自行实现）
           const res = await this.$axios({
-            url: '/mail/batchDelete',
-            method: 'post',
-            data: { ids: this.selectedMailIds }
+            url: 'http://localhost:8081/mail-message/batchDelete',
+            method: 'get',
+            params: {  ids: this.selectedMailIds.join(',') }
           })
 
           if (res.data.code === "0") {

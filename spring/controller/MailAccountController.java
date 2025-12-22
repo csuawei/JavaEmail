@@ -79,4 +79,13 @@ public class MailAccountController {
         mailAccountService.getBaseMapper().insert(mailAccount);
         return ResultUtil.success(mailAccount);
     }
+
+    @PostMapping("/deleteAccount")
+    public Object deleteAccount(@RequestBody MailDTO mailDTO){
+        int i = mailAccountService.getBaseMapper().deleteById(mailDTO.getId());
+        if (i>0){
+            return ResultUtil.success(mailDTO.getId(),"删除成功");
+        }
+        return ResultUtil.fail("102","删除失败");
+    }
 }

@@ -19,9 +19,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -268,6 +270,20 @@ public class MailMessageController {
             return ResultUtil.success(null);
         }
         else return ResultUtil.fail("909","删除失败");
+    }
+
+    @GetMapping("/batchDelete")
+    public Object batchDelete(@RequestParam("ids") String idsStr) {
+
+        List<Long> ids = Arrays.stream(idsStr.split(","))
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+        for (Long id : ids) {
+            MailMessage mailMessage = mailMessageService.getBaseMapper().selectById(id);
+            mailMessage.setIsDeleted((byte) 1);
+            mailMessageService.getBaseMapper().updateById(mailMessage);
+        }
+        return ResultUtil.success(ids);
     }
 
 
