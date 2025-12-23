@@ -3,11 +3,16 @@
     <!-- 搜索框区域 -->
     <div style="width: 300px;">
       <el-input
-        placeholder="搜索邮件"
+        placeholder="搜索邮件（主题/内容）"
         prefix-icon="el-icon-search"
         v-model="input"
         size="small"
-      ></el-input>
+        @keyup.enter.native="handleSearch"
+      >
+        <template #append>
+          <el-button icon="el-icon-search" size="mini" @click="handleSearch"></el-button>
+        </template>
+      </el-input>
     </div>
 
     <!-- 用户信息与操作区域 -->
@@ -45,6 +50,17 @@ export default {
     }
   },
   methods: {
+     handleSearch() {
+      if (!this.input.trim()) {
+        this.$message.warning('请输入搜索关键词');
+        return;
+      }
+      // 跳转到邮件列表页并携带搜索参数
+      this.$router.push({
+        path: '/letter/inbox',
+        query: { searchKey: this.input.trim() }
+      });
+    },
 
     // 切换邮箱账户 - 跳转到邮箱账户管理页面
     switchMailAccount() {

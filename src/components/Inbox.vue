@@ -106,12 +106,21 @@ export default {
       mailList: [],
       userEmail: '',
       userId:'',
-      selectedMailIds: [] // 选中的邮件ID（用于批量操作）
+      selectedMailIds: [], // 选中的邮件ID（用于批量操作）
+      searchKey: ''  // 新增搜索关键词
     }
   },
   mounted() {
     // 初始化用户信息
     this.initUserInfo()
+    this.searchKey = this.$route.query.searchKey || '';
+  },
+   watch: {
+    // 监听路由变化，重新加载数据
+    '$route'(to) {
+      this.searchKey = to.query.searchKey || '';
+      this.fetchMailList();
+    }
   },
   methods: {
     /**
@@ -132,7 +141,6 @@ export default {
         this.$router.push('/mail/account')
         return
       }
-
       // 加载邮件列表
       this.fetchMailList()
     },
@@ -145,6 +153,7 @@ export default {
       const userInfo = JSON.parse(userInfoStr)
       console.log(userInfo)
       this.loading = true
+      if(!this.searchKey){
       try {
         const res = await this.$axios({
           url: 'http://localhost:8081/mail-recipient/getMailIdByEmail',
@@ -167,6 +176,31 @@ export default {
         this.loading = false
         this.refreshLoading = false
       }
+    }
+    else{
+        try {
+        const res = await this.$axios({
+          url: 'http://localhost:8081/mail-message/search',
+          method: 'post',
+          data: { email: this.userEmail, searchKey: this.searchKey }
+        })
+
+        // （code: "0" 成功）
+        if (res.data.code === "0") {
+          this.mailList = res.data.data || []
+        } else {
+          this.mailList = []
+          this.$message.warning(res.data.msg || '获取邮件失败')
+        }
+      } catch (err) {
+        this.mailList = []
+        console.error('邮件列表请求异常：', err)
+        this.$message.error('网络异常，请稍后重试')
+      } finally {
+        this.loading = false
+        this.refreshLoading = false
+      }
+    }
     },
     /**
      * 拉取邮件

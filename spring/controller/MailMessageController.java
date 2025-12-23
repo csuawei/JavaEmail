@@ -2,6 +2,7 @@ package com.db.spring.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.db.spring.dto.DraftDTO;
+import com.db.spring.dto.MailSearchDTO;
 import com.db.spring.dto.MailSendDTO;
 import com.db.spring.entity.MailAccount;
 import com.db.spring.entity.MailMessage;
@@ -297,5 +298,17 @@ public class MailMessageController {
         return ResultUtil.success(mailMessage);
     }
 
-
+    @PostMapping("/search")
+    public Object search(@RequestBody MailSearchDTO mailSearchDTO) {
+        String email = mailSearchDTO.getEmail();
+        String searchKey = mailSearchDTO.getSearchKey();
+        QueryWrapper<MailMessage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("sender_account_email",email).or().like("sender_email",email);
+        queryWrapper.like("subject",searchKey).or().like("content",searchKey);
+        List<MailMessage> mailMessages = mailMessageService.getBaseMapper().selectList(queryWrapper);
+        if(mailMessages!=null && mailMessages.size()>0){
+            return ResultUtil.success(mailMessages);
+        }
+        return ResultUtil.fail("910","暂无数据");
+    }
 }
