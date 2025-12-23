@@ -10,6 +10,14 @@
       >
         返回收件箱
       </el-button>
+      <el-button 
+        type="primary" 
+        icon="el-icon-arrow-left" 
+        size="mini" 
+        @click="writeLetter"
+      >
+        回复
+      </el-button>
       <!-- 下载所有附件按钮：有附件时显示，添加加载状态 -->
       <el-button 
         v-if="attachments.length > 0" 
@@ -99,6 +107,9 @@
 </template>
 
 <script>
+import Contact from './Contact.vue';
+import WriteLetter from './WriteLetter.vue';
+
 export default {
   name: 'MailDetail',
   data() {
@@ -134,7 +145,7 @@ export default {
     this.fetchAttachmentList()
   },
   computed: {
-    // 邮件基本信息列表（严格适配mail_message表字段）
+    // 邮件基本信息列表
     mailInfoList() {
       return [
         { label: '发件人', value: this.getSenderText() },
@@ -282,15 +293,20 @@ export default {
       }
     },
 
+    async writeLetter() {
+      this.$router.push({
+        path: '/letter/write',
+        query: { contactEmail: this.mailDetail.senderAccountEmail || '' }
+      })
+    },
+
     /**
      * 格式化发件人文本（优先sender_email，无则用sender_account_email）
      */
     getSenderText() {
       if (!this.mailDetail) return '未知发件人'
       const { senderEmail, senderAccountEmail } = this.mailDetail
-      if (senderEmail) return senderEmail
-      if (senderAccountEmail) return senderAccountEmail
-      return '未知发件人'
+      return senderAccountEmail
     },
 
     /**
@@ -302,7 +318,7 @@ export default {
         0: '草稿',
         1: '已发送',
         2: '已接收',
-        3: '已撤回'
+        3: '已收藏'
       }
       return statusMap[this.mailDetail.status] || `未知状态(${this.mailDetail.status})`
     },

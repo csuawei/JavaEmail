@@ -102,7 +102,10 @@ public class MailMessageController {
     @GetMapping("/getMailByEmail")
     public Object getMailByEmail(@RequestParam("email") String email){
         QueryWrapper<MailMessage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like("sender_account_email",email).orderByDesc("send_time");
+        queryWrapper.like("sender_account_email",email)
+                .orderByDesc("send_time")
+                .eq("is_deleted",0)
+                .orderByAsc("status");
         List<MailMessage> mailMessages = mailMessageService.getBaseMapper().selectList(queryWrapper);
         if(mailMessages!=null && mailMessages.size()>0){
             return ResultUtil.success(mailMessages);
@@ -284,6 +287,14 @@ public class MailMessageController {
             mailMessageService.getBaseMapper().updateById(mailMessage);
         }
         return ResultUtil.success(ids);
+    }
+
+    @GetMapping("/mark")
+    public Object mark(@RequestParam("id") Long id,@RequestParam("status") int status) {
+        MailMessage mailMessage = mailMessageService.getBaseMapper().selectById(id);
+        mailMessage.setStatus((byte) status);
+        mailMessageService.getBaseMapper().updateById(mailMessage);
+        return ResultUtil.success(mailMessage);
     }
 
 

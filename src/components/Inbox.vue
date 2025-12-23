@@ -1,8 +1,9 @@
 <template>
   <!-- 无需外层容器，直接渲染在 el-main 的 router-view 中 -->
-  <div class="inbox-wrapper">
-    <!-- 邮件列表操作栏（与主页面布局对齐） -->
+    <div class="inbox-wrapper">
+    <!-- 邮件列表操作栏（新增批量标记按钮） -->
     <div class="mail-operate-bar">
+      <!-- 原有按钮保持不变 -->
       <el-button 
         type="primary" 
         icon="el-icon-refresh" 
@@ -21,17 +22,8 @@
       >
         删除选中
       </el-button>
-      <el-button 
-        type="text" 
-        icon="el-icon-mark-read" 
-        size="mini" 
-        @click="markAsRead"
-        :disabled="selectedMailIds.length === 0"
-      >
-        标记为已读
-      </el-button>
-    </div>
 
+    </div>
     <!-- 邮件列表容器（贴合 el-main 布局） -->
     <el-card shadow="hover" class="mail-list-card">
       <!-- 加载状态 -->
@@ -64,6 +56,21 @@
         style="width: 100%;"
       >
         <el-table-column type="selection" width="55"></el-table-column>
+
+         <!-- 新增标记状态列 -->
+        <el-table-column label="标记" width="60">
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              icon="el-icon-star-on"
+              size="mini"
+              class="mark-icon"
+              :style="{ color: scope.row.status === 3 ? '#FFCC00' : '#C0C4CC' }"
+              @click.stop="toggleMark(scope.row)"
+            ></el-button>
+          </template>
+        </el-table-column>
+
         <el-table-column label="发件人" prop="senderAccountEmail" width="180">
           <template slot-scope="scope">
             <span class="sender-text">{{ scope.row.senderAccountEmail || '未知发件人' }}</span>
@@ -121,8 +128,8 @@ export default {
       this.userId = userInfo.userId
       console.log(this.userEmail)
       if (!this.userEmail) {
-        this.$message.warning('用户邮箱配置异常，请重新登录')
-        this.$router.push('/login')
+        this.$message.warning('未获取到用户邮箱，请新建邮箱账户')
+        this.$router.push('/mail/account')
         return
       }
 
@@ -131,7 +138,7 @@ export default {
     },
 
     /**
-     * 调用后端接口获取邮件列表（适配现有接口路径）
+     * 调用后端接口获取邮件列表
      */
     async fetchMailList() {
       const userInfoStr = sessionStorage.getItem('userInfo')
@@ -286,32 +293,35 @@ export default {
     },
 
     /**
-     * 批量标记为已读（示例方法，需后端接口配合）
+     * 单个邮件标记/取消标记状态
      */
-    markAsRead() {
-      if (this.selectedMailIds.length === 0) return
-
+    async toggleMark(row) {
+      const targetStatus = row.status === 3 ? 2 : 3; // 3=标记，2=取消（恢复已接收）
       try {
-        // 调用后端批量标记接口（需自行实现）
-        this.$axios({
-          url: '/mail/batchMarkRead',
-          method: 'post',
-          data: { ids: this.selectedMailIds }
-        }).then(res => {
-          if (res.data.code === "0") {
-            this.$message.success('标记成功')
-            this.fetchMailList()
-            this.selectedMailIds = []
-          } else {
-            this.$message.warning(res.data.msg || '标记失败')
+        const res = await this.$axios({
+          url: 'http://localhost:8081/mail-message/mark',
+          method: 'get',
+          headers: { 'Content-Type': 'application/json' },
+          params: { 
+            id: row.messageId,  
+            status: targetStatus
           }
         })
+
+        if (res.data.code === "0") {
+          // 本地更新状态（避免重新请求列表）
+          row.status = targetStatus;
+          this.$message.success(targetStatus === 3 ? '标记成功' : '取消标记成功');
+        } else {
+          this.$message.warning(res.data.msg || '操作失败');
+        }
       } catch (err) {
-        console.error('标记邮件异常：', err)
-        this.$message.error('标记失败，请稍后重试')
+        console.error('标记状态更新异常：', err);
+        this.$message.error('网络异常，操作失败');
       }
-    }
+    },
   }
+
 }
 </script>
 

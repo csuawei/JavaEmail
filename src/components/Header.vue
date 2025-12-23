@@ -3,7 +3,7 @@
     <!-- 搜索框区域 -->
     <div style="width: 300px;">
       <el-input
-        placeholder="搜索邮件、联系人..."
+        placeholder="搜索邮件"
         prefix-icon="el-icon-search"
         v-model="input"
         size="small"

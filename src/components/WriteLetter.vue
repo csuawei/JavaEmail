@@ -94,10 +94,16 @@ export default {
       fileList: [], // 附件显示列表
       uploadFiles: [], // 实际待上传的文件数组
       mailAccountList: [], // 后端返回的邮箱列表
-      currentUserId: null // 当前用户ID
+      currentUserId: null, // 当前用户ID
+      contactEmail: '' // 联系人邮箱
     }
   },
   created() {
+
+    this.contactEmail = this.$route.query.contactEmail || ''
+    if (this.$route.query.contactEmail) {
+      this.mailForm.receiverEmail = this.$route.query.contactEmail
+    }
     // 1. 从sessionStorage获取用户信息（增加异常处理）
     try {
       const userInfoStr = sessionStorage.getItem('userInfo');
@@ -114,7 +120,7 @@ export default {
         return;
       }
       this.currentUserId = userInfo.userId;
-      // 2. 调用接口获取邮箱列表（核心：之前遗漏了调用）
+      // 2. 调用接口获取邮箱列表
       this.getMailAccountList();
     } catch (err) {
       console.error('解析用户信息失败：', err);
@@ -190,6 +196,9 @@ export default {
         if (valid) {
           try {
             const formData = new FormData();
+            if(this.contactEmail) {
+              this.mailForm.receiverEmail = this.contactEmail
+            }
             // 添加文本参数
             formData.append('senderEmail', this.mailForm.senderEmail.trim());
             formData.append('receiverEmail', this.mailForm.receiverEmail.trim());
