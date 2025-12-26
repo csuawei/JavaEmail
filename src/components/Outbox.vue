@@ -63,9 +63,9 @@
         style="width: 100%;"
       >
         <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column label="发件人" prop="senderAccountEmail" width="180">
+        <el-table-column label="收件人" prop="senderEmail" width="180">
           <template slot-scope="scope">
-            <span class="sender-text">{{ scope.row.senderAccountEmail || '未知发件人' }}</span>
+            <span class="sender-text">{{ scope.row.senderEmail || '未知发件人' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="主题" prop="subject">

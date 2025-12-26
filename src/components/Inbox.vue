@@ -3,7 +3,6 @@
     <div class="inbox-wrapper">
     <!-- 邮件列表操作栏（新增批量标记按钮） -->
     <div class="mail-operate-bar">
-      <!-- 原有按钮保持不变 -->
       <el-button 
         type="primary" 
         icon="el-icon-refresh" 
